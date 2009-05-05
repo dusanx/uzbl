@@ -84,6 +84,7 @@ static gchar*   history_handler    = NULL;
 static gchar*   fifo_dir           = NULL;
 static gchar*   socket_dir         = NULL;
 static gchar*   download_handler   = NULL;
+static gchar*   cookie_text_file   = NULL;
 static gboolean always_insert_mode = FALSE;
 static gboolean show_status        = FALSE;
 static gboolean insert_mode        = FALSE;
@@ -123,6 +124,7 @@ static char *proxy_url = NULL;
 static char *useragent = NULL;
 static gint max_conns;
 static gint max_conns_host;
+static SoupCookieJar* soup_cookie;
 
 /* --- UTILITY FUNCTIONS --- */
 
@@ -1011,7 +1013,14 @@ settings_init () {
     printf("User-agent: %s\n", useragent? useragent : "default");
     printf("Maximum connections: %d\n", max_conns ? max_conns : 0);
     printf("Maximum connections per host: %d\n", max_conns_host ? max_conns_host: 0);
-		
+
+    //Cookies
+    cookie_text_file = g_key_file_get_value (config, "behavior", "cookie_text_file",   NULL);
+    if (cookie_text_file) {
+        printf("Cookie text file location: %s\n", cookie_text_file);        
+        soup_cookie = soup_cookie_jar_text_new (cookie_text_file, FALSE);
+        soup_session_add_feature(soup_session, SOUP_SESSION_FEATURE(soup_cookie));
+    }
 }
 
 int
